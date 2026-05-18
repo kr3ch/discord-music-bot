@@ -1,0 +1,39 @@
+services:
+  bot:
+    build: .
+    container_name: discord-music-bot
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+    # Uncomment if switching to Postgres:
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    # environment:
+    #   DATABASE_URL: postgresql://musicbot:musicbot@db:5432/musicbot
+
+  # ── Optional: PostgreSQL ────────────────────────────────────────────
+  # 1. Uncomment this block.
+  # 2. Set provider = "postgresql" in prisma/schema.prisma.
+  # 3. Set DATABASE_URL accordingly in your .env (or rely on the env above).
+  # 4. Run: docker compose run --rm bot npx prisma migrate deploy
+  #
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: discord-music-bot-db
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: musicbot
+  #     POSTGRES_PASSWORD: musicbot
+  #     POSTGRES_DB: musicbot
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U musicbot"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+# volumes:
+#   pgdata:

@@ -1,0 +1,99 @@
+// This is your Prisma schema file.
+// To switch from SQLite to PostgreSQL:
+//   1. Change `provider` below to "postgresql"
+//   2. Update DATABASE_URL in .env
+//   3. Run `npm run prisma:migrate`
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ── Guild settings ─────────────────────────────────────────────────
+model GuildSettings {
+  guildId          String  @id
+  prefix           String  @default("/")
+  volume           Int     @default(80)
+  djRoleId         String?
+  restrictChannel  String?
+  twentyFourSeven  Boolean @default(false)
+  autoplay         Boolean @default(false)
+  leaveTimeout     Int     @default(60)
+  maxQueueSize     Int     @default(500)
+  announceNowPlay  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ── Saved playlists ────────────────────────────────────────────────
+model Playlist {
+  id        Int            @id @default(autoincrement())
+  name      String
+  userId    String
+  guildId   String
+  tracks    PlaylistTrack[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
+}
+
+model PlaylistTrack {
+  id         Int      @id @default(autoincrement())
+  playlistId Int
+  title      String
+  url        String
+  duration   Int      @default(0)
+  thumbnail  String   @default("")
+  author     String   @default("")
+  position   Int
+
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@index([playlistId])
+}
+
+// ── User favorites ─────────────────────────────────────────────────
+model FavoriteTrack {
+  id        Int    @id @default(autoincrement())
+  userId    String
+  title     String
+  url       String
+  duration  Int    @default(0)
+  author    String @default("")
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, url])
+}
+
+// ── Play history ───────────────────────────────────────────────────
+model PlayHistory {
+  id        Int    @id @default(autoincrement())
+  userId    String
+  guildId   String
+  title     String
+  url       String
+  duration  Int    @default(0)
+
+  playedAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([guildId])
+}
+
+// ── User stats ─────────────────────────────────────────────────────
+model UserStats {
+  userId        String @id
+  tracksPlayed  Int    @default(0)
+  totalDuration Int    @default(0)
+  commandsUsed  Int    @default(0)
+
+  updatedAt DateTime @updatedAt
+}
