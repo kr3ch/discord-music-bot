@@ -1,4 +1,6 @@
 import { spawn, ChildProcess } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import ffmpegStatic from 'ffmpeg-static';
 import { env } from '../config/env';
@@ -8,8 +10,15 @@ import type { TrackInfo } from '../types/track';
 
 const log = createChildLogger('stream');
 
-const FFMPEG = env.FFMPEG_PATH || ffmpegStatic || 'ffmpeg';
-const YTDLP = env.YTDLP_PATH || 'yt-dlp';
+function findBinary(envPath: string, name: string, fallback?: string | null): string {
+  if (envPath) return envPath;
+  const portable = join(process.cwd(), 'bin', `${name}.exe`);
+  if (existsSync(portable)) return portable;
+  return fallback || name;
+}
+
+const FFMPEG = findBinary(env.FFMPEG_PATH, 'ffmpeg', ffmpegStatic);
+const YTDLP = findBinary(env.YTDLP_PATH, 'yt-dlp');
 
 export interface StreamHandle {
   stream: Readable;

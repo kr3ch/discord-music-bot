@@ -1,4 +1,6 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { env } from '../../config/env';
 import { createChildLogger } from '../../utils/logger';
 import { SourceError } from '../../utils/errors';
@@ -6,7 +8,13 @@ import type { TrackInfo, SearchResult } from '../../types/track';
 
 const log = createChildLogger('source:youtube');
 
-const YTDLP = env.YTDLP_PATH || 'yt-dlp';
+function findYtdlp(): string {
+  if (env.YTDLP_PATH) return env.YTDLP_PATH;
+  const portable = join(process.cwd(), 'bin', 'yt-dlp.exe');
+  if (existsSync(portable)) return portable;
+  return 'yt-dlp';
+}
+const YTDLP = findYtdlp();
 
 interface YtdlpEntry {
   id?: string;
