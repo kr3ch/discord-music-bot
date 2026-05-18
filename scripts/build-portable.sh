@@ -63,6 +63,8 @@ cd "$OUT_DIR"
 npm ci --omit=dev --ignore-scripts
 # Install prisma CLI so bat scripts can run `prisma generate` on Windows
 npm install prisma --no-save 2>/dev/null
+# Install Windows-specific native bindings (npm skips cross-platform optional deps)
+npm install @snazzah/davey-win32-x64-msvc --no-save --force 2>/dev/null || true
 # Generate Prisma client with Windows engine
 npx prisma generate
 cd "$REPO_ROOT"
