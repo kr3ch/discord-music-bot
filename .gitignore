@@ -47,6 +47,10 @@ prisma/migrations/dev.db*
 # coverage
 coverage/
 
+# portable build artifacts
+.portable-build/
+discord-music-bot-portable-*.zip
+
 # misc
 *.tmp
 *.bak
