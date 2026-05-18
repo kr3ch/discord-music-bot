@@ -75,6 +75,15 @@ cp "$REPO_ROOT/portable/README.txt" "$OUT_DIR/"
 cp "$REPO_ROOT/.env.example" "$OUT_DIR/"
 cp "$REPO_ROOT/LICENSE" "$OUT_DIR/" 2>/dev/null || true
 
+# Ensure CRLF line endings for all Windows text files
+if command -v unix2dos &>/dev/null; then
+    unix2dos -q "$OUT_DIR"/*.bat "$OUT_DIR"/*.txt "$OUT_DIR"/.env.example 2>/dev/null || true
+elif command -v sed &>/dev/null; then
+    for f in "$OUT_DIR"/*.bat "$OUT_DIR"/*.txt "$OUT_DIR"/.env.example; do
+        [ -f "$f" ] && sed -i 's/$/\r/' "$f"
+    done
+fi
+
 # ── Download portable Node.js ─────────────────────────────────
 echo "[6/8] Downloading Node.js v${NODE_VERSION} (win-x64)..."
 TEMP_NODE="$BUILD_DIR/node.zip"
