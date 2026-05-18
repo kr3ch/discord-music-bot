@@ -2,8 +2,8 @@ import { ChatInputCommandInteraction, GuildMember } from 'discord.js';
 import { getVoiceConnection } from '@discordjs/voice';
 
 export function getUserVoiceChannel(interaction: ChatInputCommandInteraction) {
-  const member = interaction.member as GuildMember;
-  return member.voice.channel;
+  const member = interaction.member as GuildMember | null;
+  return member?.voice?.channel ?? null;
 }
 
 export function getBotVoiceChannel(guildId: string) {

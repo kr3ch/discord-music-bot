@@ -13,7 +13,7 @@ set "YTDLP_PATH=%BOT_DIR%bin\yt-dlp.exe"
 set "FFMPEG_PATH=%BOT_DIR%bin\ffmpeg.exe"
 
 echo [BOT] Running database setup...
-"%BOT_DIR%runtime\node\npx.cmd" prisma db push --skip-generate
+"%BOT_DIR%runtime\node\node.exe" node_modules\prisma\build\index.js db push --skip-generate
 
 echo [BOT] Starting Discord Music Bot...
 echo [BOT] Press Ctrl+C to stop
