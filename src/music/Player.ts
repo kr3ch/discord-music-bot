@@ -83,6 +83,8 @@ export class GuildPlayer {
       if (this.connection.joinConfig.channelId === channel.id) return;
     }
 
+    log.info({ channelId: channel.id, guildId: channel.guild.id }, 'Joining voice channel');
+
     this.connection = joinVoiceChannel({
       channelId: channel.id,
       guildId: channel.guild.id,
@@ -92,13 +94,23 @@ export class GuildPlayer {
 
     this.connection.subscribe(this.audioPlayer);
 
+    this.connection.on('stateChange', (oldState, newState) => {
+      log.info(
+        { from: oldState.status, to: newState.status },
+        'Voice connection state change',
+      );
+    });
+
+    this.connection.on('error', (error) => {
+      log.error({ err: error }, 'Voice connection error');
+    });
+
     this.connection.on(VoiceConnectionStatus.Disconnected, async () => {
       try {
         await Promise.race([
           entersState(this.connection!, VoiceConnectionStatus.Signalling, 5_000),
           entersState(this.connection!, VoiceConnectionStatus.Connecting, 5_000),
         ]);
-        // Voice is reconnecting on its own — nothing to do.
       } catch {
         log.warn({ guildId: this.guildId }, 'Voice disconnected unrecoverably');
         this.destroy();
@@ -108,6 +120,7 @@ export class GuildPlayer {
     try {
       await entersState(this.connection, VoiceConnectionStatus.Ready, 30_000);
     } catch (err) {
+      log.error({ status: this.connection.state.status }, 'Voice connection timed out');
       this.connection.destroy();
       this.connection = null;
       throw new MusicError(`Could not join voice channel: ${(err as Error).message}`);
