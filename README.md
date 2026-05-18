@@ -247,6 +247,45 @@ sudo systemctl enable --now musicbot
 journalctl -u musicbot -f
 ```
 
+### Option D: Discloud (free Discord-bot hosting, no card required)
+
+[Discloud](https://discloud.app) is a Brazilian PaaS specifically for Discord bots. The free plan gives you a small always-on container — ffmpeg is available via `APT=ffmpeg`, and we drop a `yt-dlp` Linux binary into `./bin/` during the build step. The repo already ships a working `discloud.config` and `.discloudignore`.
+
+1. Join the Discloud Discord server: <https://discord.gg/discloud>.
+2. In the server, send `.token` to the Discloud bot in DM to get your `DISCLOUD_TOKEN`.
+3. Install the CLI on your machine: `npm i -g discloud-cli` and `discloud login`.
+4. From the project root, zip and upload:
+
+   ```bash
+   # First-time upload
+   discloud apps upload
+
+   # Subsequent updates (commit-style redeploy)
+   discloud apps commit <APP_ID>
+   ```
+
+5. Set environment variables in the Discloud dashboard (<https://discloud.app/dashboard>) for your app:
+   - `DISCORD_TOKEN`
+   - `CLIENT_ID`
+   - `DATABASE_URL=file:./data/bot.db`
+   - `YTDLP_PATH=./bin/yt-dlp`
+   - *(optional)* `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `GENIUS_TOKEN`
+6. Slash commands need to be registered once (Discord requires this). The simplest path is to run it locally **with the same token**:
+
+   ```bash
+   npm install
+   echo "DISCORD_TOKEN=..." > .env && echo "CLIENT_ID=..." >> .env
+   npm run deploy:commands
+   ```
+
+   Global registration propagates within ~1 hour. Set `DEV_GUILD_ID` for instant guild-only registration during testing.
+
+**Free-plan caveats**
+
+- RAM is capped (typically 100–512 MB on free tiers). One concurrent stream is fine; many simultaneous guilds may OOM. Lower `RAM=` in `discloud.config` if the platform rejects 512.
+- Idle apps may be paused. Keep at least one server using the bot regularly.
+- SQLite lives in `./data/bot.db` inside the container; back it up periodically via `discloud apps backup <APP_ID>`.
+
 ---
 
 ## Environment variables
