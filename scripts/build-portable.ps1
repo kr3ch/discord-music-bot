@@ -47,12 +47,13 @@ Copy-Item "$RepoRoot\dist"   "$OutDir\dist"   -Recurse
 Copy-Item "$RepoRoot\prisma" "$OutDir\prisma" -Recurse
 # Patch schema.prisma to generate Windows Prisma engine
 $schema = Join-Path "$OutDir\prisma" "schema.prisma"
-(Get-Content $schema -Raw) -replace 'provider = "prisma-client-js"', "provider = `"prisma-client-js`"`n  binaryTargets = [`"windows`"]" | Set-Content $schema -NoNewline
+(Get-Content $schema -Raw) -replace 'provider = "prisma-client-js"', "provider = `"prisma-client-js`"`n  binaryTargets = [`"native`", `"windows`"]" | Set-Content $schema -NoNewline
 Copy-Item "$RepoRoot\package.json"     "$OutDir\"
 Copy-Item "$RepoRoot\package-lock.json" "$OutDir\"
 
 Push-Location $OutDir
 npm ci --omit=dev --ignore-scripts
+npm install prisma --no-save 2>$null
 npx prisma generate
 Pop-Location
 

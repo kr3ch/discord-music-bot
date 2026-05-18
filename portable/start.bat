@@ -47,6 +47,12 @@ set "NODE_ENV=production"
 set "YTDLP_PATH=%BOT_DIR%bin\yt-dlp.exe"
 set "FFMPEG_PATH=%BOT_DIR%bin\ffmpeg.exe"
 
+:: -- Generate Prisma client for current platform (first run) --
+if not exist "node_modules\.prisma\client\query_engine-windows.dll.node" (
+    echo [BOT] Generating Prisma client for Windows (first run)...
+    "%BOT_DIR%runtime\node\npx.cmd" prisma generate 2>>logs\error.log
+)
+
 :: -- Run Prisma migrations --
 echo [BOT] Running database migrations...
 "%BOT_DIR%runtime\node\npx.cmd" prisma migrate deploy 2>>logs\error.log

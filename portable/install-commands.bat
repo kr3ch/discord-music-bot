@@ -17,6 +17,12 @@ if not exist ".env" (
 set "PATH=%BOT_DIR%runtime\node;%BOT_DIR%bin;%PATH%"
 set "NODE_ENV=production"
 
+:: -- Generate Prisma client for current platform (first run) --
+if not exist "node_modules\.prisma\client\query_engine-windows.dll.node" (
+    echo [CMD] Generating Prisma client for Windows (first run)...
+    "%BOT_DIR%runtime\node\npx.cmd" prisma generate 2>>logs\error.log
+)
+
 :: -- Register slash commands --
 echo [CMD] Registering slash commands with Discord API...
 echo.
