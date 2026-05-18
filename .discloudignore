@@ -1,0 +1,18 @@
+# Files to exclude from Discloud upload zip (similar to .gitignore).
+# Dependencies are installed on the server; uploading them wastes bandwidth.
+node_modules
+dist
+.git
+.github
+.vscode
+.idea
+data/*.db
+data/*.db-journal
+logs
+*.log
+coverage
+.env
+.env.local
+.env.*.local
+.DS_Store
+Thumbs.db
