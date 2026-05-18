@@ -45,6 +45,9 @@ Pop-Location
 Write-Host "[5/8] Assembling production files..."
 Copy-Item "$RepoRoot\dist"   "$OutDir\dist"   -Recurse
 Copy-Item "$RepoRoot\prisma" "$OutDir\prisma" -Recurse
+# Patch schema.prisma to generate Windows Prisma engine
+$schema = Join-Path "$OutDir\prisma" "schema.prisma"
+(Get-Content $schema -Raw) -replace 'provider = "prisma-client-js"', "provider = `"prisma-client-js`"`n  binaryTargets = [`"windows`"]" | Set-Content $schema -NoNewline
 Copy-Item "$RepoRoot\package.json"     "$OutDir\"
 Copy-Item "$RepoRoot\package-lock.json" "$OutDir\"
 

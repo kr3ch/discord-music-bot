@@ -1,12 +1,11 @@
 @echo off
-chcp 65001 >nul 2>&1
 title Install Slash Commands
 setlocal enabledelayedexpansion
 
 set "BOT_DIR=%~dp0"
 cd /d "%BOT_DIR%"
 
-:: ── Check .env ───────────────────────────────────────────────
+:: -- Check .env --
 if not exist ".env" (
     echo [ERROR] .env file not found!
     echo   Copy .env.example to .env and fill in your tokens first.
@@ -14,11 +13,11 @@ if not exist ".env" (
     exit /b 1
 )
 
-:: ── Set portable paths ───────────────────────────────────────
+:: -- Set portable paths --
 set "PATH=%BOT_DIR%runtime\node;%BOT_DIR%bin;%PATH%"
 set "NODE_ENV=production"
 
-:: ── Register slash commands ──────────────────────────────────
+:: -- Register slash commands --
 echo [CMD] Registering slash commands with Discord API...
 echo.
 

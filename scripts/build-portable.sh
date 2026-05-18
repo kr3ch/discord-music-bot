@@ -52,15 +52,16 @@ echo "[5/8] Assembling production files..."
 # dist/
 cp -r "$REPO_ROOT/dist" "$OUT_DIR/dist"
 
-# prisma/
+# prisma/ — copy and patch schema for Windows binary target
 cp -r "$REPO_ROOT/prisma" "$OUT_DIR/prisma"
+sed -i 's/provider = "prisma-client-js"/provider = "prisma-client-js"\n  binaryTargets = ["windows"]/' "$OUT_DIR/prisma/schema.prisma"
 
 # Production node_modules (clean install)
 cp "$REPO_ROOT/package.json" "$OUT_DIR/"
 cp "$REPO_ROOT/package-lock.json" "$OUT_DIR/"
 cd "$OUT_DIR"
 npm ci --omit=dev --ignore-scripts
-# Generate Prisma client inside portable node_modules
+# Generate Prisma client with Windows engine
 npx prisma generate
 cd "$REPO_ROOT"
 
