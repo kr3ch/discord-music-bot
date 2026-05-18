@@ -90,6 +90,7 @@ export class GuildPlayer {
       guildId: channel.guild.id,
       adapterCreator: channel.guild.voiceAdapterCreator,
       selfDeaf: true,
+      debug: true,
     });
 
     this.connection.subscribe(this.audioPlayer);
@@ -103,6 +104,10 @@ export class GuildPlayer {
 
     this.connection.on('error', (error) => {
       log.error({ err: error }, 'Voice connection error');
+    });
+
+    this.connection.on('debug', (message) => {
+      log.info({ voiceDebug: message }, 'Voice debug');
     });
 
     this.connection.on(VoiceConnectionStatus.Disconnected, async () => {

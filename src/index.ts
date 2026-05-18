@@ -1,4 +1,5 @@
 import { BotClient } from './client';
+import { generateDependencyReport } from '@discordjs/voice';
 import { env } from './config/env';
 import { connectDatabase, disconnectDatabase } from './database/prisma';
 import { loadCommands } from './handlers/commandHandler';
@@ -9,6 +10,7 @@ const log = createChildLogger('bootstrap');
 
 async function main() {
   log.info('Starting Discord music bot…');
+  log.info({ report: generateDependencyReport() }, 'Voice dependency report');
 
   await connectDatabase();
 
