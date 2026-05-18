@@ -63,10 +63,26 @@ cd "$OUT_DIR"
 npm ci --omit=dev --ignore-scripts
 # Install prisma CLI so bat scripts can run `prisma generate` on Windows
 npm install prisma --no-save 2>/dev/null
-# Install Windows-specific native bindings (npm skips cross-platform optional deps)
-npm install @snazzah/davey-win32-x64-msvc --no-save --force 2>/dev/null || true
 # Generate Prisma client with Windows engine
 npx prisma generate
+
+# Install Windows-specific native bindings that npm skips on Linux:
+# 1. @snazzah/davey (voice encryption) — copy .node into the package dir
+npm install @snazzah/davey-win32-x64-msvc --no-save --force 2>/dev/null || true
+if [ -f "node_modules/@snazzah/davey-win32-x64-msvc/davey.win32-x64-msvc.node" ]; then
+    cp node_modules/@snazzah/davey-win32-x64-msvc/davey.win32-x64-msvc.node node_modules/@snazzah/davey/
+    echo "   davey win32 binding: OK"
+fi
+# 2. @discordjs/opus — download Windows prebuilt from GitHub releases
+OPUS_VER=$(node -p "require('./node_modules/@discordjs/opus/package.json').version" 2>/dev/null || echo "0.10.0")
+OPUS_PREBUILD_DIR="node_modules/@discordjs/opus/prebuild/node-v127-napi-v3-win32-x64-unknown-unknown"
+mkdir -p "$OPUS_PREBUILD_DIR"
+OPUS_URL="https://github.com/discordjs/opus/releases/download/v${OPUS_VER}/opus-v${OPUS_VER}-node-v127-napi-v3-win32-x64-unknown-unknown.tar.gz"
+if curl -fSL --retry 2 "$OPUS_URL" -o /tmp/opus-win.tar.gz 2>/dev/null; then
+    tar -xzf /tmp/opus-win.tar.gz -C "$OPUS_PREBUILD_DIR/" --strip-components=1
+    rm -f /tmp/opus-win.tar.gz
+    echo "   opus win32 prebuild: OK"
+fi
 cd "$REPO_ROOT"
 
 # Portable scripts & docs
