@@ -91,7 +91,7 @@ export class GuildPlayer {
       adapterCreator: channel.guild.voiceAdapterCreator,
       selfDeaf: true,
       debug: true,
-    });
+    } as Parameters<typeof joinVoiceChannel>[0]);
 
     this.connection.subscribe(this.audioPlayer);
 

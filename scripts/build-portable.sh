@@ -67,12 +67,26 @@ npm install prisma --no-save 2>/dev/null
 npx prisma generate
 
 # Install Windows-specific native bindings that npm skips on Linux:
-# 1. @snazzah/davey (voice encryption) — copy .node into the package dir
+
+# 1. @snazzah/davey (DAVE voice encryption) — make it optional so bot starts
+#    even if the native binary can't load on Windows portable build.
+#    Patch @discordjs/voice to wrap the davey require in try-catch.
+VOICE_INDEX="node_modules/@discordjs/voice/dist/index.js"
+if [ -f "$VOICE_INDEX" ]; then
+    # Make davey require optional
+    sed -i 's|var import_davey = __toESM(require("@snazzah/davey"));|var import_davey; try { import_davey = __toESM(require("@snazzah/davey")); } catch(e) { import_davey = { default: null }; }|' "$VOICE_INDEX"
+    # Make getMaxProtocolVersion return 0 when davey is unavailable (disables DAVE)
+    sed -i 's|return import_davey.default.DAVE_PROTOCOL_VERSION;|return import_davey.default ? import_davey.default.DAVE_PROTOCOL_VERSION : 0;|' "$VOICE_INDEX"
+    echo "   patched @discordjs/voice: davey is now optional"
+fi
+
+# Also try to install the native binding (best effort)
 npm install @snazzah/davey-win32-x64-msvc --no-save --force 2>/dev/null || true
 if [ -f "node_modules/@snazzah/davey-win32-x64-msvc/davey.win32-x64-msvc.node" ]; then
     cp node_modules/@snazzah/davey-win32-x64-msvc/davey.win32-x64-msvc.node node_modules/@snazzah/davey/
     echo "   davey win32 binding: OK"
 fi
+
 # 2. @discordjs/opus — download Windows prebuilt from GitHub releases
 OPUS_VER=$(node -p "require('./node_modules/@discordjs/opus/package.json').version" 2>/dev/null || echo "0.10.0")
 OPUS_PREBUILD_DIR="node_modules/@discordjs/opus/prebuild/node-v127-napi-v3-win32-x64-unknown-unknown"
