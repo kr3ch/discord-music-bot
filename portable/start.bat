@@ -50,7 +50,12 @@ set "FFMPEG_PATH=%BOT_DIR%bin\ffmpeg.exe"
 :: -- Generate Prisma client for current platform (first run) --
 if not exist "node_modules\.prisma\client\query_engine-windows.dll.node" (
     echo [BOT] Generating Prisma client for Windows (first run)...
-    "%BOT_DIR%runtime\node\npx.cmd" prisma generate 2>>logs\error.log
+    "%BOT_DIR%runtime\node\npx.cmd" prisma generate
+    if errorlevel 1 (
+        echo [ERROR] Prisma generate failed
+        pause
+        exit /b 1
+    )
 )
 
 :: -- Run Prisma migrations --
@@ -61,11 +66,6 @@ if errorlevel 1 (
     "%BOT_DIR%runtime\node\npx.cmd" prisma db push --skip-generate 2>>logs\error.log
 )
 
-:: -- Get timestamp for log file --
-for /f "tokens=1-3 delims=/ " %%a in ('date /t') do set "DSTAMP=%%c-%%a-%%b"
-for /f "tokens=1-2 delims=: " %%a in ('time /t') do set "TSTAMP=%%a%%b"
-set "LOGFILE=logs\bot_%DSTAMP%_%TSTAMP%.log"
-
 :: -- Kill any existing instance --
 tasklist /fi "WINDOWTITLE eq DiscordMusicBot" 2>nul | find /i "node" >nul && (
     echo [BOT] Stopping previous instance...
@@ -75,16 +75,14 @@ tasklist /fi "WINDOWTITLE eq DiscordMusicBot" 2>nul | find /i "node" >nul && (
 
 :: -- Start the bot --
 echo [BOT] Starting Discord Music Bot...
-echo [BOT] Log file: %LOGFILE%
 echo [BOT] Press Ctrl+C to stop
 echo.
 
-"%BOT_DIR%runtime\node\node.exe" dist/index.js 2>&1 > "%LOGFILE%"
+"%BOT_DIR%runtime\node\node.exe" dist/index.js
 
-if errorlevel 1 (
-    echo.
-    echo [ERROR] Bot exited with an error. Check %LOGFILE%
-    pause
-)
+echo.
+echo [BOT] Bot has stopped.
+echo.
+pause
 
 endlocal
